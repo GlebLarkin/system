@@ -13,6 +13,7 @@ What I want next:
 9. Blured terminal theme and other programs
 10. My config from monkeytype
 11. My aliases
+
 # Ионосфера по IRI
 
 Каталог содержит C++ порт модели IRI-2020 в части **электронной плотности**
@@ -21,8 +22,7 @@ $N_e(h)$, [м<sup>−3</sup>]. Вход: геодезические коорди
 
 ---
 
-Ионосфера делится на слои, в каждом их которых расчет электронной плотности отличается. Формулы для электронной плотности используют разные параметры (`f0F2`, `hmF2`, `B0`, `hVT`, ...), не зависящие от слоя.
-Расчёт в два шага: сначала параметры слоёв, затем по высоте точки выбирается кусок профиля и считается $N_e(h)$.
+Ионосфера делится на слои, в каждом их которых расчет электронной плотности отличается. Формулы для электронной плотности используют разные вспомогательные параметры (`f0F2`, `hmF2`, `B0`, `hVT`, ...), не зависящие от слоя. Вспомонательные параметры вычисляются при первом вызове.
 
 ---
 
@@ -30,26 +30,6 @@ $N_e(h)$, [м<sup>−3</sup>]. Вход: геодезические коорди
 
 `iri_details::ne_at` в [`ne_calc.hpp`](iri/ne_calc.hpp) сравнивает высоту `h`
 [км] с заранее посчитанными границами и вызывает одну из шести моделей.
-
-
-```
-h, км
- ^
- |    topside          NeQuick
- +--  hmF2             главный максимум, NmF2
- |    F2               NeF2Model
- +--  hmF1             максимум F1 (если F1 нет: hmF1 = hmF2)
- |    F1               NeF1Model
- +--  HZ
- |    промежуточная    NeInterModel
- +--  hVT              верх долины E (если долины нет: hVT = hmE)
- |    долина E         NeEModel, минимум на hVB
- +--  hmE              максимум E, NmE (110 км)
- |    низ E            NeDModel
- +--  hDX
- |    D                NeDModel, на hmD плотность = NmD
- +--  ne_lower_boundary   65 км днём, 80 км ночью; ниже Ne = 0
-```
 
 ### 1. Topside: `h >= hmF2` (`NeQuick`)
 
@@ -77,8 +57,7 @@ N_e = \mathrm{NmF2}\,\frac{e^{-x^{\mathrm{B1}}}}{\cosh x}
 ### 3. F1: `HZ <= h < hmF1` (`NeF1Model`)
 **Слой F1 может отсутствовать**
 
-Отдельной формулы пика нет: в формулу п. 2 подставляется
-преобразованная высота.
+Отдельной формулы пика нет: в формулу п. 2 подставляется преобразованная высота.
 
 ```math
 h^{\ast\ast} = \mathrm{hmF1}\left(1 - \left(\frac{\mathrm{hmF1}-h}{\mathrm{hmF1}}\right)^{1+\mathrm{C1}}\right),\qquad
@@ -90,8 +69,9 @@ N_e(h) = N_e^{\mathrm{F2}}(h^{\ast\ast})
 
 ### 4. Промежуточная область: `hVT <= h < HZ` (`NeInterModel`)
 
-Сшивка верха долины E ($N_e(\mathrm{hVT}) = \mathrm{NmE}$) с профилем F1 в точке
-`HZ`. Прямое продолжение F1 вниз пересекает `NmE` на высоте `hST`, обычно ниже `hVT` .
+Отдельной формулы пика нет: в формулу п. 3 подставляется преобразованная высота.
+
+Прямое продолжение F1 вниз пересекает `NmE` на высоте `hST`, обычно ниже `hVT` .
 
 `hST` - корень $N_e^{\mathrm{F1}}(h)=\mathrm{NmE}$, либо его нет(`nullopt`). `HZ = (h_low + ctx.hST_bracket_low())/2`, где `h_low = hST`, если корень найден, иначе `hVT`
 
@@ -117,10 +97,6 @@ h_1 = \mathrm{HZ} + \frac{s}{2} \mp \sqrt{s\left(\frac{s}{4}-(h-\mathrm{HZ})\rig
 ```math
 N_e(h) = N_e^{\mathrm{F1}}(h_1)
 ```
-
-Отображение устроено так: $h=\mathrm{hVT}\mapsto h_1=\mathrm{hST}$
-(значит $N_e(\mathrm{hVT})=\mathrm{NmE}$) и $h=\mathrm{HZ}\mapsto h_1=\mathrm{HZ}$
-с единичной производной (гладкая сшивка с F1).
 
 $N_e^{\mathrm{F1}}$ - формула п. 3 (с преобразованием F1, если слой есть).
 
@@ -149,14 +125,6 @@ N_e = \begin{cases}
 N_e = \mathrm{NmD}\,\exp\bigl(z\,(F_{P1} + z\,(F_{P2} + z\,F_{P3}))\bigr)
 ```
 
-```math
-F_{P1}=F_1,\quad F_{P2}=-F_1^{2}/2,\quad
-F_{P3}=\begin{cases}
-(-F_2 F_{P2}-F_{P1}+1/F_2)/F_2^{2}, & z>0,\\
-(-F_3 F_{P2}-F_{P1}-1/F_3)/F_3^{2}, & z\le 0.
-\end{cases}
-```
-
 **Низ E, `hDX < h < hmE`.** $u = \mathrm{hmE}-h$:
 
 ```math
@@ -174,46 +142,11 @@ N_e = \mathrm{NmE}\,\exp(-D_1 u^{p})
 
 using namespace otk::models;
 
-std::vector<Geodetic>      coords = {/* lat, lon: рад; h: м */};
-std::vector<time::Calendar> times = {/* одна эпоха на все точки или по эпохе на точку */};
-std::vector<SolarActivity>  solar = {/* одна запись на все точки или по записи на точку */};
+std::vector<Geodetic>      coords = {/* lat, lon: рад; h: м; size = n */};
+std::vector<time::Calendar> times = {/* size = 1 or size = n */};
+std::vector<SolarActivity>  solar = {/* size = 1 or size = n */};
 
 std::vector<otk::scalar> ne = Ne(coords, times, solar);   // ne[i]: м^-3
-```
-
-| Аргумент | Тип | Единицы | Длина |
-|----------|-----|---------|-------|
-| `coords` | `span<const Geodetic>` | `lat`, `lon` в радианах, `h` в метрах над эллипсоидом | $n$ |
-| `times` | `span<const time::Calendar>` | UTC | 1 или $n$ |
-| `solar` | `span<const SolarActivity>` | см. ниже | 1 или $n$ |
-| результат | `vector<scalar>` | м<sup>−3</sup> | $n$ |
-
-Другая длина `times` или `solar` даёт `std::invalid_argument`.
-Высота переводится в километры на входе (`iri_details::meters_to_km`), дальше
-везде километры. Если `h` ниже `ne_lower_boundary` (65 км днём, 80 км ночью),
-результат 0.
-
-Чтобы посмотреть параметры слоёв, а не только $N_e$, используйте контекст напрямую
-(так делают тесты):
-
-```cpp
-IriConfig cfg{Geodetic{lat, lon, 300e3}, calendar, solar};
-IriContext<DefaultIriParamPolicy> ctx{cfg};
-ctx.f0F2();  ctx.hmF2();  ctx.hVT();  ctx.HZ();  ctx.F1_exists();
-```
-
----
-
-## Порядок чтения кода
-
-Структура вызова:
-
-```
-Ne(coords, times, solar)
- └─ для каждой точки:
-     IriConfig{coords[i], times[i], solar[i]}   // входные данные + производные величины
-     IriContext<IriParamPolicy>{config}         // параметры слоёв, считаются лениво
-     ne_at<IriModelPolicy>(ctx, h_km)           // выбор профиля по высоте
 ```
 
 ---
@@ -224,28 +157,30 @@ Ne(coords, times, solar)
 параметр считает статический метод `compute(ctx)` модели из `IriParamPolicy`.
 Тип модели по умолчанию задан в [`default_iri_policy.hpp`](iri/default_iri_policy.hpp).
 
-| Параметр | Смысл | Единицы | Модель по умолчанию | Каталог в `realizations/` |
-|----------|-------|---------|---------------------|---------------------------|
-| `f0F2` | критическая частота F2 | МГц | `F0F2URSIModel` | `f0F2` |
-| `M3000F2` | $M(3000)F2$, коэффициент пересчёта к MUF | 1 | `MUFIri22Model` | `f0F2` |
-| `hmF2` | высота пика F2 | км | `HmF2Shu2015Model` | `hmF2` |
-| `B0`, `B1` | толщина и форма F2 снизу | км, 1 | `B0B1ABT2009Model` | `b0b1` |
-| `F1_exists` | есть ли слой F1 | bool | `ExistenceF1ProbabilityModel` + `HmF1Iri22Model` | `existenceF1`, `hmF1` |
-| `f0F1` | критическая частота F1 | МГц | `F0F1DuCharmeModel` | `f0F1` |
-| `hmF1` | высота пика F1 | км | `HmF1Iri22Model` | `hmF1` |
-| `C1` | форма F1 | 1 | `C1F1ReinischModel` | `c1` |
-| `f0E` | критическая частота E | МГц | `F0ECCIRModel` | `f0E` |
-| `hmE` | высота пика E | км | `HmEConstantModel` (110) | `hmE` |
-| `hVB` | дно долины E | км | `HVBIri22Model` | `hVB` |
-| `hVT` | верх долины E | км | `HVTIri22Model` | `hVT` |
-| `hST` | высота, где профиль F1/F2 даёт $N_e = N_mE$ | км | `HSTIri22Model` | `hST` |
-| `HZ` | нижняя граница F1, верх промежуточной области | км | `HZIri22Model` | `hz` |
-| `hmD` | опорная высота D, где $N_e = \mathrm{NmD}$ | км | `HmDIri22Model` (81 день, 88 ночь) | `hmD` |
-| `nmD` | концентрация на `hmD` | м<sup>−3</sup> | `NmDBilitza78Model` | `nmD` |
-| `hDX` | сшивка D с нижней частью E | км | `HDXIri22Model` | `hDX` |
+| Параметр | Смысл | Единицы | Модель по умолчанию |
+|----------|-------|---------|---------------------|
+| `f0F2` | критическая частота F2 | МГц | `F0F2URSIModel` |
+| `M3000F2` | $M(3000)F2$, коэффициент | 1 | `MUFIri22Model` |
+| `hmF2` | высота пика F2 | км | `HmF2Shu2015Model` |
+| `B0`, `B1` | толщина и форма F2 снизу | км, 1 | `B0B1ABT2009Model` |
+| `F1_exists` | есть ли слой F1 | bool | `ExistenceF1ProbabilityModel` + `HmF1Iri22Model` |
+| `f0F1` | критическая частота F1 | МГц | `F0F1DuCharmeModel` |
+| `hmF1` | высота пика F1 | км | `HmF1Iri22Model` |
+| `C1` | форма F1 | 1 | `C1F1ReinischModel` |
+| `f0E` | критическая частота E | МГц | `F0ECCIRModel` |
+| `hmE` | высота пика E | км | `HmEConstantModel` (110) |
+| `hVB` | дно долины E | км | `HVBIri22Model` |
+| `hVT` | верх долины E | км | `HVTIri22Model` |
+| `hST` | высота, где профиль F1/F2 даёт $N_e = N_mE$ | км | `HSTIri22Model` |
+| `HZ` | нижняя граница F1, верх промежуточной области | км | `HZIri22Model` |
+| `hmD` | опорная высота D, где $N_e = \mathrm{NmD}$ | км | `HmDIri22Model` |
+| `nmD` | концентрация на `hmD` | м<sup>−3</sup> | `NmDBilitza78Model` |
+| `hDX` | сшивка D с нижней частью E | км | `HDXIri22Model` |
 
 Скалярные величины, которые не относятся к слоям, `IriContext` берёт из
 `ctx.config()`.
+
+Магнитное поле считается через GeographicLib и коэффициенты IGRF-14 (`utility/igrf_data/igrf14.wmm`), оригинальная IRI использует `igrf.for`. Формулы наклонения, `DIPL` и `MODIP` взяты из IRI.
 
 ---
 
@@ -266,26 +201,6 @@ Ne(coords, times, solar)
 Времена восхода и захода: `IriConfig::SR(height_km)`, `IriConfig::SS(height_km)`,
 местное время: `IriConfig::lt_hours()`. Значения $\pm 99$ кодируют полярный день
 и полярную ночь.
-
----
-
-## Что считает `IriConfig`
-
-Из входных координат, времени и `SolarActivity` выводятся:
-
-| Величина | Метод | Примечание |
-|----------|-------|------------|
-| UT, день года, местное время | `ut_hours`, `day_of_year`, `lt_hours` | |
-| зенитный угол Солнца | `kappa`, `kappa_noon` | в радианах |
-| наклонение $I$ и dip-широта | `inc`, `mag_dip_lat` | IGRF-14 на высоте 300 км |
-| modip | `modip`, `modip_at(lat, lon)` | модифицированная дипольная широта |
-| нижняя граница профиля | `ne_lower_boundary` | 65 км день, 80 км ночь |
-| $R_{12}$, $IG_{12}$, $F_{10.7}$ | `R12`, `IG12`, `F107_*` | см. следующий раздел |
-
-Углы в C++ везде в радианах, высоты IRI в километрах, `Geodetic::h` в метрах.
-
-Магнитное поле считается через GeographicLib и коэффициенты IGRF-14
-(`utility/igrf_data/igrf14.wmm`), оригинальная IRI использует `igrf.for`. Формулы наклонения, `DIPL` и `MODIP` взяты из IRI.
 
 ---
 
@@ -341,7 +256,7 @@ struct MyParams : DefaultIriParamPolicy {
 auto ne = Ne<DefaultIriModelPolicy, MyParams>(coords, times, solar);
 ```
 
-Альтернативы, которые есть в коде: `F0F2CCIRModel`,`ExistenceF1SolarZenithAngleModel`, `ExistenceF1EasyProbabilityModel`
+Реализованные альтернативные модели: `F0F2CCIRModel`,`ExistenceF1SolarZenithAngleModel`, `ExistenceF1EasyProbabilityModel`
 
 ---
 
