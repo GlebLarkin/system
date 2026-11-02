@@ -38,6 +38,9 @@ install_files() {
     place "$item" "$HOME/$(basename "$item")"
   done
   place "$ROOT/bin/xdg-terminal-exec" "$HOME/.local/bin/xdg-terminal-exec"
+  # Takes the "show in folder" D-Bus name from Nautilus, which wins it system-wide.
+  place "$ROOT/share/dbus-1/services/org.freedesktop.FileManager1.service" \
+    "$HOME/.local/share/dbus-1/services/org.freedesktop.FileManager1.service"
   mkdir -p "$HOME/Pictures/Screenshots"
   place "$ROOT/wallpapers" "$HOME/Pictures/wallpapers"
 }

@@ -29,6 +29,7 @@ cd system
 | `config/` | `~/.config/` |
 | `home/` | `~/` |
 | `bin/` | `~/.local/bin/` |
+| `share/` | `~/.local/share/` |
 | `wallpapers/` | `~/Pictures/wallpapers/` |
 
 В `config/hypr/` лежат только hyprlock, hypridle и скрипты, которые вызывает niri. Hyprland как таковой здесь не настраивается.
