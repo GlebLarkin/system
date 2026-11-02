@@ -1,0 +1,54 @@
+[window]
+opacity = 0.85
+blur = true
+decorations = "None"
+dynamic_padding = true
+padding = { x = 12, y = 10 }
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
+size = 12.0
+
+[cursor]
+style = { shape = "Beam", blinking = "Off" }
+
+[scrolling]
+history = 5000
+
+[selection]
+save_to_clipboard = true
+
+[colors.primary]
+background = "#0c0c0c"
+foreground = "#d4d4d4"
+
+[colors.cursor]
+text = "#0c0c0c"
+cursor = "#e6e6e6"
+
+[colors.selection]
+text = "#ffffff"
+background = "#3a3a3a"
+
+# monochrome UI, ANSI colours muted so ls/git output stays readable
+[colors.normal]
+black = "#2a2a2a"
+red = "#c97b7b"
+green = "#9fb89a"
+yellow = "#c9b98a"
+blue = "#8ea3b8"
+magenta = "#a99bb5"
+cyan = "#8fb0ad"
+white = "#c4c4c4"
+
+[colors.bright]
+black = "#5a5a5a"
+red = "#d99a9a"
+green = "#b5ccb0"
+yellow = "#dccfa4"
+blue = "#a8bccf"
+magenta = "#c0b4cb"
+cyan = "#a8c7c4"
+white = "#ececec"

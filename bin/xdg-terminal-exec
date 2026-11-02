@@ -1,0 +1,4 @@
+#!/bin/sh
+# GLib and other apps call this to open Terminal=true programs.
+[ $# -eq 0 ] && exec alacritty
+exec alacritty -e "$@"

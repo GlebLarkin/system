@@ -1,0 +1,53 @@
+/* Minimal Glass: dark translucent pills */
+
+* {
+	font-family: "JetBrainsMono Nerd Font";
+	font-weight: bold;
+	font-size: 97%;
+	min-height: 0;
+	border: none;
+	box-shadow: none;
+}
+
+window#waybar {
+	background: rgba(10, 10, 14, 0.55);
+	color: rgba(235, 235, 240, 0.9);
+}
+
+#workspaces,
+#clock,
+#battery,
+#language,
+#network,
+#custom-hypridle {
+	background: transparent;
+	padding: 3px 12px;
+	margin: 0;
+}
+
+#network.disconnected, #network.disabled { color: rgba(235, 235, 240, 0.35); }
+
+#workspaces { padding: 3px 6px; }
+
+#workspaces button {
+	color: rgba(235, 235, 240, 0.35);
+	padding: 0 4px;
+	background: transparent;
+	border-radius: 8px;
+}
+#workspaces button.active { color: rgba(255, 255, 255, 0.95); }
+#workspaces button:hover { background: rgba(255, 255, 255, 0.08); }
+
+#battery.charging, #battery.plugged { color: #a6e3a1; }
+#battery.warning:not(.charging) { color: #f9e2af; }
+#battery.critical:not(.charging) { color: #f38ba8; }
+
+/* hypridle running = laptop may sleep (dim); stopped = sleep disabled (bright) */
+#custom-hypridle.active { color: rgba(235, 235, 240, 0.35); }
+#custom-hypridle.notactive { color: #f9e2af; }
+
+tooltip {
+	background: rgba(10, 10, 14, 0.85);
+	border-radius: 10px;
+}
+tooltip label { color: rgba(235, 235, 240, 0.9); }

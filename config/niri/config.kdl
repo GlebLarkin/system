@@ -1,0 +1,299 @@
+// Niri config, keybinds ported from ~/.config/hypr (Keybinds.conf, UserKeybinds.conf, Laptops.conf)
+// Vertical: workspaces (Mod+Up/Down, Mod+Tab). Horizontal: columns (Mod+Left/Right, Mod+H/L).
+
+input {
+    keyboard {
+        xkb {
+            layout "us,ru"
+            options "grp:caps_toggle"
+        }
+        repeat-delay 300
+        repeat-rate 50
+        numlock
+    }
+    touchpad {
+        tap
+        natural-scroll
+        dwt
+    }
+    focus-follows-mouse
+}
+
+layout {
+    gaps 8
+    center-focused-column "never"
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    default-column-width { proportion 0.5; }
+    focus-ring {
+        width 2
+        active-color "#e6e6e6"
+        inactive-color "#333333"
+    }
+    border { off; }
+    shadow {
+        on
+        softness 40
+        spread 2
+        offset x=0 y=8
+        color "#00000080"
+    }
+}
+
+animations {
+    workspace-switch {
+        duration-ms 340
+        curve "cubic-bezier" 0.3 0.0 0.2 1.0
+    }
+    window-open {
+        duration-ms 180
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 150
+        curve "ease-out-quad"
+    }
+    horizontal-view-movement {
+        duration-ms 220
+        curve "ease-out-cubic"
+    }
+    window-movement {
+        duration-ms 200
+        curve "ease-out-cubic"
+    }
+    window-resize {
+        duration-ms 200
+        curve "ease-out-cubic"
+    }
+    overview-open-close {
+        duration-ms 220
+        curve "ease-out-cubic"
+    }
+}
+
+prefer-no-csd
+
+// Permanent workspaces, so Mod+N / Mod+Shift+N always hit workspace N
+workspace "1"
+workspace "2"
+workspace "3"
+workspace "4"
+workspace "5"
+workspace "6"
+workspace "7"
+workspace "8"
+workspace "9"
+workspace "10"
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+hotkey-overlay { skip-at-startup; }
+
+// colour of the gap between workspaces (and behind the overview)
+overview {
+    backdrop-color "#0c0c0c"
+}
+
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+}
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+window-rule {
+    opacity 0.92
+    draw-border-with-background false
+    background-effect {
+        blur true
+    }
+}
+window-rule {
+    match app-id=r#"^(mpv|vlc|org\.kde\.haruna)$"#
+    opacity 1.0
+    background-effect {
+        blur false
+    }
+}
+layer-rule {
+    match namespace="^(waybar|rofi|swaync-control-center)$"
+    background-effect {
+        blur true
+    }
+}
+
+environment {
+    EDITOR "nvim"
+    TERMINAL "alacritty"
+    PATH "/home/gleblarkin/.local/bin:/usr/local/bin:/usr/bin"
+}
+
+spawn-at-startup "swww-daemon" "--format" "xrgb"
+spawn-at-startup "sh" "-c" "$HOME/.config/hypr/scripts/Polkit.sh"
+spawn-at-startup "nm-applet" "--indicator"
+spawn-at-startup "swaync"
+spawn-at-startup "blueman-applet"
+spawn-at-startup "waybar" "-c" "/home/gleblarkin/.config/waybar/configs/[TOP] Minimal Glass (niri)"
+spawn-at-startup "wl-paste" "--type" "text" "--watch" "cliphist" "store"
+spawn-at-startup "wl-paste" "--type" "image" "--watch" "cliphist" "store"
+spawn-at-startup "hypridle"
+
+binds {
+    // --- session / apps ---
+    Ctrl+Alt+Delete { quit; }
+    Mod+Q repeat=false { close-window; }
+    Mod+Shift+Q { spawn-sh "$HOME/.config/hypr/scripts/KillActiveProcess.sh"; }
+    Ctrl+Alt+L { spawn-sh "$HOME/.config/hypr/scripts/LockScreen.sh"; }
+    Ctrl+Alt+P { spawn-sh "$HOME/.config/hypr/scripts/Wlogout.sh"; }
+    Mod+Shift+N { spawn-sh "swaync-client -t -sw"; }
+    Mod+Shift+E { spawn-sh "$HOME/.config/hypr/scripts/Kool_Quick_Settings.sh"; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    Mod+D { spawn-sh "pkill rofi || true && rofi -show drun -modi drun,filebrowser,run,window"; }
+    Mod+B { spawn "xdg-open" "https://"; }
+    Mod+A repeat=false { toggle-overview; }
+    Mod+Return { spawn "alacritty"; }
+    Mod+Shift+Return { spawn "alacritty"; }
+    Mod+E { spawn "thunar"; }
+
+    Mod+Alt+R { spawn-sh "$HOME/.config/hypr/scripts/Refresh.sh"; }
+    Mod+Alt+E { spawn-sh "$HOME/.config/hypr/scripts/RofiEmoji.sh"; }
+    Mod+Alt+V { spawn-sh "$HOME/.config/hypr/scripts/ClipManager.sh"; }
+    Mod+Ctrl+R { spawn-sh "$HOME/.config/hypr/scripts/RofiThemeSelector.sh"; }
+    Mod+Ctrl+Shift+R { spawn-sh "pkill rofi || true && $HOME/.config/hypr/scripts/RofiThemeSelector-modified.sh"; }
+    Mod+Ctrl+Alt+B { spawn-sh "pkill -SIGUSR1 waybar"; }
+    Mod+Ctrl+B { spawn-sh "$HOME/.config/hypr/scripts/WaybarStyles.sh"; }
+    Mod+Alt+B { spawn-sh "$HOME/.config/hypr/scripts/WaybarLayout.sh"; }
+    Mod+Shift+M { spawn-sh "$HOME/.config/hypr/UserScripts/RofiBeats.sh"; }
+    Mod+W { spawn-sh "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh"; }
+    Mod+Shift+W { spawn-sh "$HOME/.config/hypr/UserScripts/WallpaperEffects.sh"; }
+    Ctrl+Alt+W { spawn-sh "$HOME/.config/hypr/UserScripts/WallpaperRandom.sh"; }
+    Mod+Shift+Backslash { spawn-sh "$HOME/.config/hypr/scripts/KeyBinds.sh"; }
+    Mod+Shift+O { spawn-sh "$HOME/.config/hypr/UserScripts/ZshChangeTheme.sh"; }
+    Mod+Alt+C { spawn-sh "$HOME/.config/hypr/UserScripts/RofiCalc.sh"; }
+
+    // --- window state ---
+    Mod+Shift+F { fullscreen-window; }
+    Mod+F { maximize-column; }
+    Mod+Space { toggle-window-floating; }
+    Mod+G { toggle-column-tabbed-display; }
+    Alt+Tab { focus-window-previous; }
+
+    // --- focus: horizontal = columns, vertical = windows in a column ---
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+J { focus-window-or-workspace-down; }
+    Mod+Left { focus-column-left; }
+    Mod+Right { focus-column-right; }
+
+    // --- move windows ---
+    Mod+Ctrl+H { move-column-left; }
+    Mod+Ctrl+L { move-column-right; }
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Right { move-column-right; }
+
+    // "swap" keys: pull window into / push out of a column
+    Mod+Alt+H { consume-or-expel-window-left; }
+    Mod+Alt+L { consume-or-expel-window-right; }
+    Mod+Alt+K { move-window-up; }
+    Mod+Alt+J { move-window-down; }
+
+    // --- resize ---
+    Mod+Shift+H { set-column-width "-5%"; }
+    Mod+Shift+L { set-column-width "+5%"; }
+    Mod+Shift+K { spawn-sh "$HOME/.config/niri/resize-window-height.sh up"; }
+    Mod+Shift+J { spawn-sh "$HOME/.config/niri/resize-window-height.sh down"; }
+
+    // --- workspaces: vertical ---
+    Mod+Up   { focus-workspace-up; }
+    Mod+Down { focus-workspace-down; }
+    Mod+Ctrl+Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+Down { move-column-to-workspace-down; }
+    Mod+Ctrl+K { move-column-to-workspace-up; }
+    Mod+Ctrl+J { move-column-to-workspace-down; }
+    // windows inside one column
+    Mod+Shift+Up   { focus-window-up; }
+    Mod+Shift+Down { focus-window-down; }
+    Mod+Alt+Up { move-workspace-up; }
+    Mod+Alt+Down { move-workspace-down; }
+    Mod+Tab { focus-workspace-down; }
+    Mod+Shift+Tab { focus-workspace-up; }
+    Mod+Period { focus-workspace-down; }
+    Mod+Comma { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+    Mod+Shift+BracketLeft { move-column-to-workspace-up; }
+    Mod+Shift+BracketRight { move-column-to-workspace-down; }
+    Mod+Ctrl+BracketLeft { move-column-to-workspace-up focus=false; }
+    Mod+Ctrl+BracketRight { move-column-to-workspace-down focus=false; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+    Mod+Shift+0 { move-column-to-workspace 10; }
+    Mod+Ctrl+1 { move-column-to-workspace 1 focus=false; }
+    Mod+Ctrl+2 { move-column-to-workspace 2 focus=false; }
+    Mod+Ctrl+3 { move-column-to-workspace 3 focus=false; }
+    Mod+Ctrl+4 { move-column-to-workspace 4 focus=false; }
+    Mod+Ctrl+5 { move-column-to-workspace 5 focus=false; }
+    Mod+Ctrl+6 { move-column-to-workspace 6 focus=false; }
+    Mod+Ctrl+7 { move-column-to-workspace 7 focus=false; }
+    Mod+Ctrl+8 { move-column-to-workspace 8 focus=false; }
+    Mod+Ctrl+9 { move-column-to-workspace 9 focus=false; }
+    Mod+Ctrl+0 { move-column-to-workspace 10 focus=false; }
+
+    // --- media / hardware keys ---
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Volume.sh --inc"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Volume.sh --dec"; }
+    XF86AudioMicMute allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Volume.sh --toggle-mic"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Volume.sh --toggle"; }
+    XF86Sleep allow-when-locked=true { spawn-sh "systemctl suspend"; }
+    XF86RFKill { spawn-sh "$HOME/.config/hypr/scripts/AirplaneMode.sh"; }
+    XF86AudioPlay allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"; }
+    XF86AudioPause allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"; }
+    XF86AudioNext allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/MediaCtrl.sh --nxt"; }
+    XF86AudioPrev allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/MediaCtrl.sh --prv"; }
+    XF86AudioStop allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/MediaCtrl.sh --stop"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Brightness.sh --inc"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "$HOME/.config/hypr/scripts/Brightness.sh --dec"; }
+    XF86KbdBrightnessUp { spawn-sh "$HOME/.config/hypr/scripts/BrightnessKbd.sh --inc"; }
+    XF86KbdBrightnessDown { spawn-sh "$HOME/.config/hypr/scripts/BrightnessKbd.sh --dec"; }
+    XF86TouchpadToggle { spawn-sh "$HOME/.config/hypr/scripts/TouchPad.sh"; }
+    XF86Launch1 { spawn "rog-control-center"; }
+    XF86Launch3 { spawn "asusctl" "led-mode" "-n"; }
+    XF86Launch4 { spawn "asusctl" "profile" "-n"; }
+
+    // --- screenshots ---
+    Mod+Print { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --now"; }
+    Mod+Shift+Print { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --area"; }
+    Mod+Ctrl+Print { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --in5"; }
+    Mod+Ctrl+Shift+Print { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --in10"; }
+    Alt+Print { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --active"; }
+    Mod+Shift+S { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --swappy"; }
+    Mod+F6 { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --now"; }
+    Mod+Shift+F6 { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --area"; }
+    Mod+Ctrl+F6 { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --in5"; }
+    Mod+Alt+F6 { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --in10"; }
+    Alt+F6 { spawn-sh "$HOME/.config/hypr/scripts/ScreenShot.sh --active"; }
+}

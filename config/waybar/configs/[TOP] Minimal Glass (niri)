@@ -1,0 +1,80 @@
+// ### TOP Minimal Glass: workspaces, clock, battery, idle toggle ###
+
+{
+"include": [
+  "$HOME/.config/waybar/Modules",
+  "$HOME/.config/waybar/ModulesCustom",
+  "$HOME/.config/waybar/ModulesGroups",
+  "$HOME/.config/waybar/UserModules",
+  ],
+"layer": "top",
+"position": "top",
+"exclusive": true,
+"passthrough": false,
+"gtk-layer-shell": true,
+
+"modules-left": [
+	"niri/workspaces",
+	],
+
+"modules-center": [
+	"clock",
+	],
+
+"modules-right": [
+	"niri/language",
+	"network#wifi",
+	"custom/hypridle",
+	"battery",
+	],
+
+"niri/language": {
+	"format": "󰌌 {shortDescription}",
+	"on-click": "niri msg action switch-layout next",
+},
+
+"network#wifi": {
+	"interface": "wlp2s0",
+	"interval": 5,
+	"format": "󰤮",
+	"format-wifi": "{icon}",
+	"format-disconnected": "󰤮",
+	"format-disabled": "󰤮",
+	"format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+	"tooltip-format": "Нет подключения",
+	"tooltip-format-wifi": "{essid} · {signalStrength}%",
+	"on-click": "nm-connection-editor",
+},
+
+"niri/workspaces": {
+	"format": "{icon}",
+	"format-icons": { "active": "", "default": "" },
+},
+
+"clock": {
+	"interval": 30,
+	"format": "{:%H:%M}",
+	"tooltip-format": "<tt><small>{calendar}</small></tt>",
+	"calendar": { "mode": "month" },
+},
+
+"battery": {
+	"states": { "warning": 30, "critical": 15 },
+	"format": "{icon} {capacity}%",
+	"format-charging": "󰂄 {capacity}%",
+	"format-plugged": "󰚥 {capacity}%",
+	"format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰁹"],
+	"tooltip-format": "{timeTo}",
+},
+
+"custom/hypridle": {
+	"format": "󰒲",
+	"return-type": "json",
+	"escape": true,
+	"exec-on-event": true,
+	"interval": 60,
+	"exec": "$HOME/.config/hypr/scripts/Hypridle.sh status",
+	"on-click": "$HOME/.config/hypr/scripts/Hypridle.sh toggle",
+	"on-click-right": "hyprlock"
+},
+}

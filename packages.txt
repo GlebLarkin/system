@@ -1,0 +1,63 @@
+# Desktop
+niri
+waybar
+swww
+hyprlock
+hypridle
+hyprpolkitagent
+xwayland-satellite
+xdg-desktop-portal-gtk
+xdg-desktop-portal-gnome
+SwayNotificationCenter
+wlogout
+rofi-wayland
+wallust
+
+# Terminal and editor
+alacritty
+kitty
+neovim
+zsh
+tmux
+git
+ripgrep
+fd-find
+gcc
+make
+
+# Script dependencies
+cliphist
+wl-clipboard
+grim
+slurp
+swappy
+jq
+bc
+yad
+curl
+ImageMagick
+libnotify
+playerctl
+brightnessctl
+pamixer
+pulseaudio-utils
+network-manager-applet
+nm-connection-editor
+blueman
+trash-cli
+tree
+
+# Apps
+Thunar
+exo
+btop
+cava
+fastfetch
+
+# Look
+flat-remix-gtk3-theme
+flat-remix-gtk4-theme
+flat-remix-icon-theme
+kvantum
+qt6ct
+nwg-look
